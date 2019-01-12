@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 
 class RNFetchBlobFS {
 
@@ -601,26 +604,15 @@ class RNFetchBlobFS {
      * @param callback JS context callback
      */
     static void mv(String path, String dest, Callback callback) {
-        File src = new File(path);
-        if(!src.exists()) {
+        Path srcPath = Paths.get(path);
+        if(!Files.exists(srcPath)) {
             callback.invoke("Source file at path `" + path + "` does not exist");
             return;
         }
 
         try {
-            InputStream in = new FileInputStream(path);
-            OutputStream out = new FileOutputStream(dest);
-
-            //read source path to byte buffer. Write from input to output stream
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) { //read is successful
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            out.flush();
-
-            src.delete(); //remove original file
+            Path destPath = Paths.get(dest);
+            Files.move(srcPath, destPath);
         } catch (FileNotFoundException exception) {
             callback.invoke("Source file not found.");
             return;
