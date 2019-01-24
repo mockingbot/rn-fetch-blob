@@ -29,9 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
 
 class RNFetchBlobFS {
 
@@ -255,7 +252,7 @@ class RNFetchBlobFS {
             if (externalDirectory != null) {
                 res.put("SDCardApplicationDir", externalDirectory.getParentFile().getAbsolutePath());
             } else {
-              res.put("SDCardApplicationDir", "");
+                res.put("SDCardApplicationDir", "");
             }
         }
         res.put("MainBundleDir", ctx.getApplicationInfo().dataDir);
@@ -604,24 +601,21 @@ class RNFetchBlobFS {
      * @param callback JS context callback
      */
     static void mv(String path, String dest, Callback callback) {
-        Path srcPath = Paths.get(path);
-        if(!Files.exists(srcPath)) {
+        File srcFile = new File(path);
+
+        if (!srcFile.exists()) {
             callback.invoke("Source file at path `" + path + "` does not exist");
             return;
         }
-
         try {
-            Path destPath = Paths.get(dest);
-            Files.move(srcPath, destPath);
-        } catch (FileNotFoundException exception) {
-            callback.invoke("Source file not found.");
+            File destFile = new File(dest);
+            srcFile.renameTo(destFile);
+            callback.invoke();
             return;
         } catch (Exception e) {
             callback.invoke(e.toString());
             return;
         }
-
-        callback.invoke();
     }
 
     /**
